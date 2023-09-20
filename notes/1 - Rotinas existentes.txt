@@ -1,2 +1,54 @@
 Sempre executar:
 
+para executar nossa pipeline, de todas as branches, podemos modififcar o arquivo
+go.yml, no seguinte trecho para:
+
+name: Go
+
+on:
+  push:
+    branches: [ "*" ]
+  pull_request:
+    branches: [ "*" ]
+
+assim, toda vez que houver um push ou pull_request, a rotina sera executada de qualquer
+que for a branch que fez o commit, lembrar sempre de colocar o asterisco entre as aspas
+tornando assim uma string, pois e assim que o github actions aceita.
+
+Multiplos sistemas:
+
+tambem podemos utilizar o matrix, para adicionamos na nossa pipeline o build em diferentes
+sistemas operacionais e para isso, devemos modificar o codigo em go.yml para:
+
+test:
+    runs-on: '${{ matrix.os }}'
+    strategy:
+      matrix:
+        go_version: ['1.19', '1.20', '>=1.20']
+        os: ['ubuntu-latest', 'ubuntu-18.04']
+
+aqui estamos dizendo que iremos realizar os testes em dois sistemas, que no caso e 
+a ultima versao do ubuntu e a versao 18.04, alem disso tambem sera testado em outras
+versoes do go, assim como antes, so que sera testado nos dois sistemas. e tambem
+podemos adicionar para o job de build, dessa forma:
+
+  build:
+    needs: test
+    runs-on: '${{ matrix.os }}'
+    strategy:
+      matrix:
+        os: ['ubuntu-latest', 'ubuntu-18.04']
+
+assim fazemos a mesma coisa, porem na parte de build do app.
+
+Nessa aula, você aprendeu como:
+
+Alterar a rotina de CI para executar em qualquer branch e, assim, mesmo durante o 
+desenvolvimento, vamos ter os testes disponíveis.
+
+Utilizar estratégias de matrizes para executar a rotina em múltiplos sistemas 
+operacionais diferentes, e ajudar a verificar se a aplicação funciona independente 
+do ambiente.
+
+A limitação das estratégias de matrizes, que estão disponíveis apenas no job que 
+foi declarada, tendo que declarar novamente em outro job para poder utilizar.
