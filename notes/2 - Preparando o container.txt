@@ -1,0 +1,129 @@
+Dockerfile:
+
+Para prepararmos o ambiente e colocar o app dentro de um container, nesse caso 
+devemos primeiro buildar a aplicacao, atraves do comando:
+
+go build main.go
+
+que e executado dentro da pasta raiz do projeto, e depois que esse comando e executado
+o mesmo cria um arquivo executavel, e sera essa arquivo que ira ser copiado para o 
+nosso container criado com o Dockerfile, dentro desse Dockerfile o seguinte trecho de
+cod:
+
+FROM ubuntu:latest
+
+EXPOSE 8000
+
+WORKDIR /app
+
+COPY ./main main
+
+CMD [ "./main" ]
+
+aqui estamos definindo com qual sistema operacional iremos utilizar no FROM,
+no EXPOSE estamos definindo a porta que o container ira expor, em WORKDIR sera o 
+diretorio com qual trabalharemos, e com o comando COPY, sera onde iremos copiar o
+o arquivo main que criamos ao buildar o app atraves do comando go build e em 
+CMD, iremos executar esse arquivo, para que fique ativo dentro do container.
+
+Container e ambiente:
+
+Somente no caso dessa aplicacao, para que possamos passar o app para dentro do container
+devemos primeiros ajustar a linha de conexao do database desse app e tambem importar a
+biblioteca os para dentro do codigo, para que assim possamos definir variaveis de ambiente
+e o container conseguir transpassar essas variaveis para a string de conexao, com o 
+seguinte trecho de cod:
+
+package database
+
+import (
+	"log"
+	"os"
+	"github.com/guilhermeonrails/api-go-gin/models"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
+)
+
+em "os" estamos importantando nossa biblioteca para conseguirmos usar as variaveis de ambiente
+
+func ConectaComBancoDeDados() {	
+	stringDeConexao := "host="+os.Getenv("HOST")+" user="+os.Getenv("USER")+" password="+os.Getenv("PASSWORD")+" dbname="+os.Getenv("DBNAME")+" port="+os.Getenv("PORT")+" sslmode=disable"
+	DB, err = gorm.Open(postgres.Open(stringDeConexao))
+	if err != nil {
+		log.Panic("Erro ao conectar com banco de dados")
+	}
+
+	DB.AutoMigrate(&models.Aluno{})
+}
+
+e aqui, estamos ajustando e cocatenando a string utilizada para fazer a conexao com o banco
+onde estao indo nossas variaveis de ambiente que sao as:
+
+os.Getenv("HOST")
+os.Getenv("USER")
+os.Getenv("PASSWORD")
+os.Getenv("DBNAME")
+os.Getenv("PORT")
+
+agora so falta definirmos os valores dessas variaveis no nosso Dockerfile, para quando
+iniciarmos o container o mesmo ja ir carregando as informacoes necessarias para a conexao.
+
+Valores padroes:
+
+e para adicionarmos as variaveis de ambiente, e prefirivel insira-las entre as chaves
+WORKDIR e COPY, pois se inserirmos acima ou abaixo, estaremos modificando camadas dentro
+do Dockerfile sem necessidade, assim da maneira indicada economizamos tempo.
+
+Podemos coloca-las no Dockerfile, da seguinte forma:
+
+ENV HOST=locahost PORT=5432
+
+ENV USER=root PASSWORD=root DBNAME=root
+
+uma linha fica especifica para as informacoes de localizacao do banco e a outra linha
+fiou especifica para as informacoes de autenticacao, tornando mais legivel e condizente.
+
+Variaveis de ambiente:
+
+Agora que preparamos o app para ser executado dentro de um container atraves do docker,
+devemos implementa o mesmo dentro de uma rotina de CI, tornando automazidado. Podemos
+fazer isso da seguinte forma, dentro do arquivo da rotina de CI, devemos adicionar as
+novas variaveis de ambiente, as mesmas que adicionamos dentro do nosso Dockerfile, 
+se nao adicionarmos os testes da rotina irao falhar e nao dar continuidade nos jobs
+seguintes da rotina. Com o seguinte trecho de cod modificado no arquivo go.yml:
+
+jobs:
+
+  test:
+    runs-on: '${{ matrix.os }}'
+    env:
+      HOST: localhost
+      PORT: 5432
+      USER: root
+      PASSWORD: root
+      DBNAME: root
+
+aqui dentro do arquivo go.yml, no job de test, foi onde inserimos nossas variaveis de
+ambiente, entre o runs-on e o strategy, assim com todas as informacoes necessarias 
+a rotina do CI ira fluir corretamente sem nenhum erro. Com isso definido podemos
+dar continuidade com a criacao de container atraves do github actions.
+
+Nessa aula, você aprendeu como:
+
+Criar um dockerfile para colocar o nosso programa dentro de uma imagem docker, 
+definindo a imagem base, a porta e os comandos que devem ser executados durante a 
+sua criação.
+
+Alterar a aplicação para ler variáveis de ambiente, permitindo assim configurar a 
+utilização de bancos de dados que não estão na mesma máquina.
+
+Permitir que a aplicação se conecte a qualquer banco de dados, podendo definir o 
+banco de acordo com o ambiente, e não dependendo de bancos de dados locais.
+
+Definir variáveis de ambiente na imagem docker, assim podemos deixar a aplicação 
+que está dentro do container igual ao que que estava fora dele, porém podendo 
+configurar mudando os seus valores.
+
+Definir as variáveis de ambiente na rotina de CI, e permitir assim que os testes 
+continuem funcionando corretamente.
+
