@@ -1,0 +1,75 @@
+Dois arquivos de CI:
+
+e agora para podermos trabalhar com o docker na nossa rotina de CI, podemos criar 
+mais um arquivo, no qual sera o docker.yml, dentro da pasta de workflows, onde nesse
+mesmo arquivo, iremos definir toda configuracao necessaria.
+
+Mas antes disso, devemos dentro do nosso go.yml, devemos criar um job com o nome de
+docker, e dentro desse jobs iremos especificar com:
+
+  docker:
+    needs: build
+    uses: ./.github/workflows/docker.yml
+
+estamos espeficando com esse trecho de codigo, que esse job ira precisar que o job
+build tenha sido efetuado com sucesso para so entao iniciar o job docker e executar
+o nosso novo arquivo.
+
+Actions Marketplace:
+
+o Marketplace do github actions, contem diversos arquivos pre configurados e com diversas
+situacoes, onde podemos utilizar por exemplo. yml do docker, dos quais realizar ambiente
+para o build, para o login e o build junto ao push. De maneira que facilite a vida do
+utilizador, e no caso do docker foi a propria docker que disponibilizaram esses arquivos 
+para que seus usuarios podessem utilizar de maneira simples e confiavel.
+
+Com isso em mente, iremos utilizar os:
+
+Docker Setup Buildx
+Docker login
+Build and push Docker images
+
+todos eles irao facilitar o desenvolvimente do nosso job. O Marketplace fica disponivel
+assim que entramos para editar nosso arquivo de rotina, se nao aparecer e recomendavel
+diminuir o zoom, assim uma guia a direita da page ira aparecer para realizar as pesquisas
+dentro do Marketplace.
+
+Preparando o docker:
+
+e ja no arquivo docker.yml, no trecho de cod:
+
+name: Docker
+
+on:
+  workflow_call:
+
+aqui estamos definindo o nome do nossa rotina como docker e esse arquivo sera executado,
+toda vez que houver uma chamada do mesmo, podemos ver isso em on: workflow_call:
+e em jobs, no trecho de cod:
+
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Docker Setup Buildx
+      uses: docker/setup-buildx-action@v3.0.0
+
+aqui estamos definindo um job com o nome de docker, onde sera testado em ubuntu-lastest
+(runs-on), e em steps, estamos dizendo que iremos trabalhar com os dados que estao no
+nosso repo atualmente em - uses: actions/checkout@v3, e no step Docker Setup Buildx
+estamos dizendo que iremos trabalhar com o buildx do repo docker, com isso ja estamos
+prontos para definir o nosso build, e em seguida realizar o login no dockerhub para 
+utilizarmos das nossas images em nosso repositorio.
+
+Nessa aula, você aprendeu:
+
+Como organizar as rotinas de CI em vários arquivos, ficando assim mais fácil de modificar e dar manutenção 
+futuramente.
+
+O que é o marketplace do Github Actions, que nos fornece várias rotinas prontas para 
+usarmos, assim não precisamos resolver problemas ou escrever códigos que já foram 
+feitos por outras pessoas.
+
+Preparar o ambiente para criarmos a imagem Docker, buscando e utilizando uma rotina 
+do marketplace do Actions.
