@@ -1,0 +1,59 @@
+Login no Docker Hub:
+
+para podermos realiazar nosso login no dockerhub atravres da rotina de CI, devemos 
+inserir o seguinte trecho de codigo:
+
+    - name: Docker Login
+      uses: docker/login-action@v3.0.0
+      with:
+        username: ssdvd 
+        password: 
+
+com o job de name docker login, estamos definindo o nome do job, em uses, especificando
+que iremos utilizar do repo docker o esquema de realizar o login atraves da rotina,
+em with:, estamos passando somente os dados necessarios para realizar o login no 
+dockerhub, que no caso sao o username e password. Iremos passas os valores com
+o secrets do github, assim aumentando nossa seguranca dentro do codigo e evitando
+se expor desnecessariamente.
+
+Segredos:
+
+antes de utilizar os nossos secrets, devemos cria-los para so entao utilizar, 
+e para isso devemos ir no repo dentro do github, com ele aberto iremos nas configuracoes
+e em seguida em "Secrets and variables" e clicamos em "New repository secret", defindo
+o o nome e valor da secrets, para assim podermos utilizarmos dentro do nosso codigo.
+
+Senha no codigo:
+
+para conseguirmos utilizar nossos secrets nesse cenario, devemos antes adicionar a 
+seguinte linha no arquivo go.yml, dentro do job docker, onde chamamos o nosso arquivo
+docker.yml:
+
+  docker:
+    needs: build
+    uses: ./.github/workflows/docker.yml
+    secrets: inherit
+
+nessa linha secrets: inherit, estamos dizendo que o arquivo ira herdar os secrets do
+repo, assim podendo utilizar para entrar fazer o login do dockerhub, conforme configuramos
+no docker.yml, que foi desse jeito:
+
+    - name: Docker Login
+      uses: docker/login-action@v3.0.0
+      with:
+        username: ${{secrets.USER_DOCKERHUB}} 
+        password: ${{secrets.PW_DOCKERHUB}} 
+
+adicionamos os secrets, da mesma forma que trabalhamos com a matrix, tornando o seu uso
+simples e seguro.
+
+Nessa aula, você aprendeu como:
+
+Fazer login em um repositório do Docker, utilizando outra rotina do Actions e 
+acessando o Docker Hub.
+
+Criar um segredo no Actions para proteger as senhas e não deixar elas abertas ou 
+visíveis.
+
+Utilizar a senha que cadastramos no Secrets, sem ter que colocar a senha diretamente 
+no código e colocando apenas uma referência para a senha.
