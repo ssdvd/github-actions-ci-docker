@@ -1,0 +1,26 @@
+Criando a imagem:
+
+para podermos criar a imagem a partir da nossa rotina de ci, devemos antes adicionar
+ao arquivo docker.yml o job que sera responsavel por isso que no caso, sera:
+
+    - name: Build and push Docker images
+      uses: docker/build-push-action@v5.0.0
+      with:
+        context: .
+        file: ./Dockerfile
+        push: true
+        tags: ssdvd/go_ci:${{github.ref_name}}
+
+Aqui estamos definindo o nome do job para build and push docker images, e estamos utilizando
+o repo proprio do docker.
+
+Em context que sera onde iremos executar esse build, que sera a nossa pasta atual.
+
+Em file estamos especificando o caminho para o Dockerfile.
+ 
+Em push estamos dizendo que queremos ou nao fazer o push dessa imagem para o docker hub.
+
+Em tags, estamos tagueando a imagem para termos facil visualizacao e entedimento sobre 
+o que se trata aquela imagem, podemos oberservar que estamos utilizando uma variavel
+do proprio github, onde o mesmo puxa a referencia do nome da branch em que estamos
+trabalhando, assim versionando e identificando de maneira eficaz.
