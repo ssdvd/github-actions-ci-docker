@@ -24,3 +24,61 @@ Em tags, estamos tagueando a imagem para termos facil visualizacao e entedimento
 o que se trata aquela imagem, podemos oberservar que estamos utilizando uma variavel
 do proprio github, onde o mesmo puxa a referencia do nome da branch em que estamos
 trabalhando, assim versionando e identificando de maneira eficaz.
+
+Criando artefatos:
+
+Para não repetirmos etapas, como a compilação do programa, podemos salvar os 
+resultados de uma rotina para usar em outra; e quem faz isso são os artefatos. 
+Sendo assim, salve o resultado da compilação do programa, que foi feita no go.yml em 
+build utilizando os artefatos.
+
+Para salvar um artefato, vamos usar mais uma rotina do marketplace, o upload artifact, 
+e vamos colocar qual arquivo queremos salvar e qual vai ser o nome do artefato, 
+ficando com:
+
+- name: Upload main compilado
+      uses: actions/upload-artifact@v3
+      with:
+        name: app_go
+        path: main
+
+Sempre que salvamos um artefato, um arquivo é criado no Github, porém não podemos 
+ter dois arquivos com o mesmo nome, igual não podemos ter 2 arquivos com o mesmo 
+nome no nosso computador.
+
+Porém, se tivermos duas ou mais rotinas, ou uma única rotina com mais de um 
+ambiente sendo executado, como no caso das estratégias de matrizes, fazendo a 
+criação de um artefato, podemos encontrar um erro, onde o github actions não 
+consegue fazer salvar o artefato que foi criado por último, interrompendo a execução.
+
+Então, sempre que você for gerar um artefato, tome cuidado para verificar se não tem
+ algum outro artefato com o mesmo nome, e se você não está executando alguma estratégia 
+ de múltiplos ambientes durante a geração do artefato.
+
+ Usando artefatos:
+
+ Agora precisamos recuperar o artefato que salvamos na última etapa para poder 
+ montar a imagem Docker. Sendo assim, faça o download do artefato que você salvou 
+ e teste a sua rotina.
+
+ Para recuperar um artefato vamos usar mais uma rotina do marketplace, o download 
+ artifact, e vamos colocar qual artefato queremos recuperar. E como podemos ter 
+ vários artefatos com nomes diferentes, precisamos informar qual vamos usar, ficando 
+ com:
+
+- name: Download main compilado
+      uses: actions/download-artifact@v3
+      with:
+        name: programa
+
+Nessa aula, você aprendeu como:
+
+Criar uma imagem Docker automaticamente, usando a rotina de CI e uma nova rotina do 
+marketplace, lembrando que essa rotina precisa de alguns campos de configuração como 
+o context: para a pasta de execução.
+
+Salvar um arquivo através dos artefatos; assim é possível baixar os arquivos e 
+verificar se a rotina está funcionando como deveria.
+
+Baixar um artefato salvo, evitando assim ter que repetir processos e gastar tempo 
+desnecessário com coisas que já fizemos, como a compilação.
